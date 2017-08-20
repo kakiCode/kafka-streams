@@ -32,5 +32,4 @@ public class TickerProcessor extends StreamsProcessor {
 		}
 	}
 
-	
 }

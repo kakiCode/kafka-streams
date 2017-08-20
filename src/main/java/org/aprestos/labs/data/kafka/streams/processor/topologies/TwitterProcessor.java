@@ -30,6 +30,7 @@ public class TwitterProcessor extends StreamsProcessor {
 			logger.debug("no timestamp from streams");
 		}
 
+
 	}
 
 }

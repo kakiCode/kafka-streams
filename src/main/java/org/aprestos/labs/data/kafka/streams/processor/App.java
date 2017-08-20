@@ -1,5 +1,6 @@
 package org.aprestos.labs.data.kafka.streams.processor;
 
+
 import java.lang.reflect.Constructor;
 import java.util.Map;
 import java.util.Properties;
@@ -37,7 +38,7 @@ public final class App {
 		settings.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, env.get(Constants.ENV_KAFKA_CONFIG));
 		settings.put(StreamsConfig.TIMESTAMP_EXTRACTOR_CLASS_CONFIG, WallclockTimestampExtractor.class);
 		StreamsConfig config = new StreamsConfig(settings);
-		
+	
 		TopologyBuilder builder = new TopologyBuilder();
 
 		String sourceTopic = ( String ) Config.INSTANCE.getCommonConfig().get(Constants.ConfigParam.sourceTopic.asString());
@@ -78,7 +79,6 @@ public final class App {
 		}
 		
 		builder.addSink(sinkName, sinkTopic, processorNames);
-		
 		streams = new KafkaStreams(builder, config);
 
 		streams.setUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {

@@ -1,5 +1,6 @@
 package org.aprestos.labs.data.kafkaconsumer;
 
+
 import java.io.IOException;
 import java.util.Map;
 
@@ -11,10 +12,12 @@ import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+
 /**
  * Unit test for simple App.
  */
 public class AppTest {
+
 
     
     @Test
@@ -37,4 +40,5 @@ public class AppTest {
 		Assert.assertEquals(2, Config.INSTANCE.getKeys().size());
 		Assert.assertEquals(4, Config.INSTANCE.getEntries(Config.INSTANCE.getKeys().get(0)).size());
 	}
+
 }
