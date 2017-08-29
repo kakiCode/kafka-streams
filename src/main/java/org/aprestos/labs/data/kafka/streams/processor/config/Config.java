@@ -1,12 +1,14 @@
 package org.aprestos.labs.data.kafka.streams.processor.config;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -15,7 +17,7 @@ public enum Config {
 	INSTANCE(), ;
 	
 	private final Map<String,Object> entries;
-	
+	private static final Logger logger = LoggerFactory.getLogger(Config.class);
 	private Config() {
 		try {
 			entries = new HashMap<String,Object>();
@@ -27,21 +29,23 @@ public enum Config {
 	
 	@SuppressWarnings("unchecked")
 	private void init() throws IOException {
-		
-		BufferedReader reader = null;
+	
+		InputStream inputStream = null;
 		try {
-			StringBuffer buff = new StringBuffer();
-			reader = new BufferedReader(new FileReader(this.getClass().getClassLoader().getResource(Constants.APP_CONFIG_FILE).getFile()));
-			String line = null;
-			while( null != (line = reader.readLine()) )
-				buff.append(line);
+
+			int ch;
+			StringBuilder sb = new StringBuilder();
+			inputStream = this.getClass().getClassLoader().getResourceAsStream(Constants.APP_CONFIG_FILE);
+			while((ch = inputStream.read()) != -1)
+			    sb.append((char)ch);
 			
 			ObjectMapper m = new ObjectMapper();
-			entries.putAll(m.readValue(buff.toString(), Map.class));
+			entries.putAll(m.readValue(sb.toString(), Map.class));
 		} 
 		finally {
-			if(null != reader)
-				reader.close();
+			if(null != inputStream)
+				try { inputStream.close(); } catch (Exception e) {
+					logger.warn("trying to close the input stream", e); }
 		}
 		
 	}

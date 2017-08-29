@@ -40,5 +40,10 @@ public class AppTest {
 		Assert.assertEquals(2, Config.INSTANCE.getKeys().size());
 		Assert.assertEquals(4, Config.INSTANCE.getEntries(Config.INSTANCE.getKeys().get(0)).size());
 	}
+    
+    @Test
+   	public void test_000_config() {
+   		Assert.assertEquals(2, Config.INSTANCE.getKeys().size());
+   	}
 
 }

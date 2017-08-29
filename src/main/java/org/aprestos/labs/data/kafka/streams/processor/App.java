@@ -37,6 +37,8 @@ public final class App {
 		settings.put(StreamsConfig.APPLICATION_ID_CONFIG, Constants.APP_NAME);
 		settings.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, env.get(Constants.ENV_KAFKA_CONFIG));
 		settings.put(StreamsConfig.TIMESTAMP_EXTRACTOR_CLASS_CONFIG, WallclockTimestampExtractor.class);
+		settings.put("max.poll.records", "20");
+		
 		StreamsConfig config = new StreamsConfig(settings);
 	
 		TopologyBuilder builder = new TopologyBuilder();
