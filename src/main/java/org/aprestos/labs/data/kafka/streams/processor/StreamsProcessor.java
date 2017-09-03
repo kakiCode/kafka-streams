@@ -8,7 +8,8 @@ import org.apache.kafka.streams.processor.ProcessorContext;
 import org.apache.kafka.streams.processor.ProcessorSupplier;
 import org.apache.kafka.streams.state.KeyValueIterator;
 import org.apache.kafka.streams.state.KeyValueStore;
-import org.aprestos.labs.data.kafka.streams.processor.config.Constants;
+import org.aprestos.labs.data.kafka.streams.processor.config.Config;
+import org.aprestos.labs.data.kafka.streams.processor.config.VARIABLE;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,10 +43,10 @@ public abstract class StreamsProcessor implements Processor<Long, byte[]>, Proce
         this.context = context;
 
         // call this processor's punctuate() method every x milliseconds.
-        this.context.schedule(Long.parseLong(config.get(Constants.ConfigParam.intervalInMillis.asString())));
+        this.context.schedule(Long.parseLong(Config.INSTANCE.getConfig(VARIABLE.INTERVAL_IN_MILLIS)));
 
         // retrieve the key-value store named "Counts"
-        this.kvStore = (KeyValueStore<Long, byte[]>) context.getStateStore(config.get(Constants.ConfigParam.store.asString()));
+        this.kvStore = (KeyValueStore<Long, byte[]>) context.getStateStore(Config.INSTANCE.getConfig(VARIABLE.PROCESSOR_STORE));
         logger.trace("init<OUT>");
 	}
 
@@ -100,15 +101,15 @@ public abstract class StreamsProcessor implements Processor<Long, byte[]>, Proce
 	}
 	
 	public String getSourceTopic(){
-		return config.get(Constants.ConfigParam.sourceTopic.asString());
+		return Config.INSTANCE.getConfig(VARIABLE.SOURCE_TOPIC);
 	}
 	
 	public String getSinkTopic(){
-		return config.get(Constants.ConfigParam.sinkTopic.asString());
+		return Config.INSTANCE.getConfig(VARIABLE.SINK_TOPIC);
 	}
 	
 	public String getName(){
-		return config.get(Constants.ConfigParam.processorName.asString());
+		return Config.INSTANCE.getConfig(VARIABLE.PROCESSOR_NAME);
 	}
 
 	@Override

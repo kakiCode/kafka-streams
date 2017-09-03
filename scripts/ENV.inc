@@ -9,8 +9,10 @@ KAFKA_CONTAINER=kafka
 KAFKA_HOST=kafka
 KAFKA_PORT=9092
 
-ZK_CONTAINER=zookeeper
-ZK_HOST=zookeeper
+export SOURCE_TOPIC=raw-tweets
+export SINK_TOPIC=raw-tweets-s
+export PROCESSOR_CLASS=org.aprestos.labs.data.kafka.streams.processor.topologies.TwitterProcessor
+export INTERVAL_IN_MILLIS=10000
 
 export KAFKA_CONFIG=$KAFKA_HOST:$KAFKA_PORT
 export DEBUG_PORT=6068

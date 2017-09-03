@@ -4,7 +4,6 @@ package org.aprestos.labs.data.kafkaconsumer;
 import java.io.IOException;
 import java.util.Map;
 
-import org.aprestos.labs.data.kafka.streams.processor.config.Config;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -34,16 +33,6 @@ public class AppTest {
 	
 		Assert.assertNotNull(o);
 	}
-    
-    @Test
-	public void test_020_jsonCasts() {
-		Assert.assertEquals(2, Config.INSTANCE.getKeys().size());
-		Assert.assertEquals(4, Config.INSTANCE.getEntries(Config.INSTANCE.getKeys().get(0)).size());
-	}
-    
-    @Test
-   	public void test_000_config() {
-   		Assert.assertEquals(2, Config.INSTANCE.getKeys().size());
-   	}
+
 
 }

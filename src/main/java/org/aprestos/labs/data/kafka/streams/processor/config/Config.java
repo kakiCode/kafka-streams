@@ -1,82 +1,75 @@
 package org.aprestos.labs.data.kafka.streams.processor.config;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 public enum Config {
-	
-	INSTANCE(), ;
-	
-	private final Map<String,Object> entries;
-	private static final Logger logger = LoggerFactory.getLogger(Config.class);
-	private Config() {
-		try {
-			entries = new HashMap<String,Object>();
-			init();
-		} catch (IOException e) {
-			throw new IllegalStateException(e);
-		}
-	}
-	
-	@SuppressWarnings("unchecked")
-	private void init() throws IOException {
-	
-		InputStream inputStream = null;
-		try {
 
-			int ch;
-			StringBuilder sb = new StringBuilder();
-			inputStream = this.getClass().getClassLoader().getResourceAsStream(Constants.APP_CONFIG_FILE);
-			while((ch = inputStream.read()) != -1)
-			    sb.append((char)ch);
-			
-			ObjectMapper m = new ObjectMapper();
-			entries.putAll(m.readValue(sb.toString(), Map.class));
-		} 
-		finally {
-			if(null != inputStream)
-				try { inputStream.close(); } catch (Exception e) {
-					logger.warn("trying to close the input stream", e); }
+	INSTANCE(),;
+
+	private final Map<String, String> entries;
+
+	private Config() {
+		entries = new HashMap<>();
+		init();
+	}
+
+	private void init() {
+
+		for (VARIABLE cv : VARIABLE.values()) {
+			if (cv.isEnvironmentProvided()) {
+				String envVar = null;
+				if (null == (envVar = System.getenv(cv.asString()))) {
+					throw new IllegalArgumentException(
+							String.format("!!! must provide environment variable %s !!!", cv.asString()));
+				}
+				entries.put(cv.asString(), envVar);
+			}
 		}
 		
+		String streamsProcessorName = String.format("%s-%s-%s", 
+				entries.get(VARIABLE.SOURCE_TOPIC.asString())
+				, entries.get(VARIABLE.PROCESSOR_CLASS.asString())
+				, entries.get(VARIABLE.SINK_TOPIC.asString()));
+		
+		for (VARIABLE cv : VARIABLE.values()) {
+			if (! cv.isEnvironmentProvided()) {
+				switch (cv) {
+					case PROCESSOR_NAME:
+						entries.put(cv.asString(), streamsProcessorName);
+						break;
+					case PROCESSOR_STORE:
+						entries.put(cv.asString(), String.format("%s-store", streamsProcessorName));
+						break;
+					case APPLICATION_ID:
+						entries.put(cv.asString(), String.format("%s-app", streamsProcessorName));
+						break;
+					case SOURCE_NAME:
+						entries.put(cv.asString(), String.format("source-%s", entries.get(VARIABLE.SOURCE_TOPIC.asString())));
+						break;
+					case SINK_NAME:
+						entries.put(cv.asString(), String.format("sink-%s", entries.get(VARIABLE.SINK_TOPIC.asString())));
+						break;
+					default:
+				}
+			}
+		}
+
 	}
-	
-	@SuppressWarnings("unchecked")
-	public Map<String,Object> getProcessorsConfig(){
+
+	public String getConfig(VARIABLE v) {
 		checkInit();
-		return(Map<String,Object>)entries.get(Constants.ConfigParam.processors.asString());
+		return entries.get(v.asString());
 	}
 	
-	@SuppressWarnings("unchecked")
-	public Map<String,Object> getCommonConfig(){
+	public Map<String,String> asMap(){
 		checkInit();
-		return(Map<String,Object>)entries.get(Constants.ConfigParam.common.asString());
+		return new HashMap<>(entries);
 	}
-	
-	public List<String> getKeys(){
-		checkInit();
-		return new ArrayList<String>(entries.keySet());
-	}
-	
-	@SuppressWarnings("unchecked")
-	public Map<String,String> getEntries(String key){
-		checkInit();
-		return (Map<String,String>) entries.get(key);
-	}
-	
-	private void checkInit(){
-		if(entries.isEmpty())
+
+	private void checkInit() {
+		if (entries.isEmpty())
 			throw new IllegalStateException("!!! Config was not initialized !!!");
 	}
-	
-	
+
 }
