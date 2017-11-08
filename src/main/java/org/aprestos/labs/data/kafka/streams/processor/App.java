@@ -32,13 +32,18 @@ public final class App {
 			settings.put(StreamsConfig.APPLICATION_ID_CONFIG, Config.INSTANCE.getConfig(VARIABLE.APPLICATION_ID));
 			settings.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, Config.INSTANCE.getConfig(VARIABLE.KAFKA_CONFIG));
 			settings.put(StreamsConfig.TIMESTAMP_EXTRACTOR_CLASS_CONFIG, WallclockTimestampExtractor.class);
-			//settings.put("max.poll.records", "20");
+			settings.put("max.poll.records", "20");
 			
 			StreamsConfig config = new StreamsConfig(settings);
 			
 			Processor<Long, byte[]> processor = null;
 			
-			Class builderClass = this.getClass().getClassLoader().loadClass(Config.INSTANCE.getConfig(VARIABLE.PROCESSOR_CLASS));
+			String processorClass = Config.INSTANCE.getConfig(VARIABLE.PROCESSOR_CLASS);
+			String sourceTopic = Config.INSTANCE.getConfig(VARIABLE.SOURCE_TOPIC);
+			String sinkTopic = Config.INSTANCE.getConfig(VARIABLE.SINK_TOPIC);
+			
+			
+			Class builderClass = this.getClass().getClassLoader().loadClass(processorClass);
 			Constructor builderConstructor = builderClass
 					.getConstructor(Map.class);
 			processor = (Processor<Long, byte[]>) builderConstructor
@@ -46,10 +51,10 @@ public final class App {
 			StateStoreSupplier store = Stores.create(Config.INSTANCE.getConfig(VARIABLE.PROCESSOR_STORE)).withLongKeys().withByteArrayValues().persistent().build();
 			
 			TopologyBuilder builder = new TopologyBuilder();
-			builder.addSource(Config.INSTANCE.getConfig(VARIABLE.SOURCE_NAME), Config.INSTANCE.getConfig(VARIABLE.SOURCE_TOPIC))
+			builder.addSource(Config.INSTANCE.getConfig(VARIABLE.SOURCE_NAME), sourceTopic)
 				.addProcessor(Config.INSTANCE.getConfig(VARIABLE.PROCESSOR_NAME), (ProcessorSupplier) processor, Config.INSTANCE.getConfig(VARIABLE.SOURCE_NAME))
 				.addStateStore(store, Config.INSTANCE.getConfig(VARIABLE.PROCESSOR_NAME))
-				.addSink(Config.INSTANCE.getConfig(VARIABLE.SINK_NAME), Config.INSTANCE.getConfig(VARIABLE.SINK_TOPIC), Config.INSTANCE.getConfig(VARIABLE.PROCESSOR_NAME));
+				.addSink(Config.INSTANCE.getConfig(VARIABLE.SINK_NAME), sinkTopic, Config.INSTANCE.getConfig(VARIABLE.PROCESSOR_NAME));
 			streams = new KafkaStreams(builder, config);
 
 			streams.setUncaughtExceptionHandler( (thread,throwable) -> logger.error("OOOPPS!", thread, throwable) );
@@ -63,6 +68,9 @@ public final class App {
 			});
 			
 			streams.start();
+			
+			logger.info("started streams.... processorClass: {} sourceTopic: {} sinkTopic: {}", processorClass, sourceTopic, sinkTopic);
+			
 		} catch (Exception e) {
 			logger.error("!!! could not start app !!!", e);
 			throw new IllegalStateException(e);

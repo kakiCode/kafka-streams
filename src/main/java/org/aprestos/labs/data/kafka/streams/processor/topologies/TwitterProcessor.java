@@ -23,8 +23,10 @@ public class TwitterProcessor extends StreamsProcessor {
 
 		PointDto point = PointUtils.fromBytes(bytes);
 		logger.debug(String.format("received point: %s", point.toString()));
-		if (null != ts)
+		if (null != ts) {
 			this.kvStore.put(ts, bytes);
+			logger.debug("processed point");
+		}
 		else {
 			this.kvStore.put(point.getTimestamp(), bytes);
 			logger.debug("no timestamp from streams");

@@ -93,6 +93,7 @@ public abstract class StreamsProcessor implements Processor<Long, byte[]>, Proce
         while (iter.hasNext()) {
             KeyValue<Long, byte[]> entry = iter.next();
             context.forward(null, entry.value);
+            logger.info("punctuate| forwarded value");
         }
         iter.close();
         // commit the current processing progress
